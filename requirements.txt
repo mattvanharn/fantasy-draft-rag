@@ -1,0 +1,20 @@
+# RAG framework
+langchain
+langchain-community
+langchain-chroma
+langchain-ollama
+
+# Vector database
+chromadb
+
+# Embeddings
+sentence-transformers
+
+# Data collection
+nfl_data_py
+
+# Utilities
+python-dotenv
+
+# Testing
+pytest
