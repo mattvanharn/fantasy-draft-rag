@@ -5,6 +5,7 @@ A hybrid AI draft assistant that combines a RAG (Retrieval-Augmented Generation)
 ## What It Does
 
 Ask questions like:
+
 - "Round 4, pick 8 — I have 2 RBs and 1 WR, who should I take?"
 - "Is Ja'Marr Chase worth his ADP this year?"
 - "What are the injury concerns for Saquon Barkley?"
@@ -41,7 +42,8 @@ news, narratives   positional needs
 | Embeddings | sentence-transformers (`all-MiniLM-L6-v2`) |
 | LLM | Groq API (`llama-3.1-70b`) |
 | Player stats | nflreadpy |
-| ADP data | Sleeper API |
+| ADP data | nflreadpy / FantasyPros |
+| Scoring | Half-PPR |
 | Testing | pytest |
 | Python version | 3.11 via pyenv |
 
@@ -55,17 +57,15 @@ cd fantasy-draft-rag
 # Set Python version (requires pyenv)
 pyenv local 3.11.14
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Install uv (Arch: sudo pacman -S uv), then install dependencies
+uv sync
 
 # Configure environment
 cp .env.example .env
 # Edit .env and add your GROQ_API_KEY (free at console.groq.com)
 ```
+
+Run scripts with `uv run python scripts/fetch_stats.py` (no need to activate the venv).
 
 ## Project Status
 
@@ -73,15 +73,16 @@ cp .env.example .env
 
 | Step | Status | Description |
 |------|--------|-------------|
-| 1. Project setup | ✅ Done | Repo, venv, dependencies |
-| 2. Groq LLM setup | ⬜ | Configure LLM via API |
-| 3. Stats data | ⬜ | Collect 2024 player stats |
-| 4. ADP data | ⬜ | Collect ADP and rankings |
-| 5. Document processing | ⬜ | Convert stats to text for RAG |
-| 6. Vector store | ⬜ | Embeddings + ChromaDB |
-| 7. Analytics engine | ⬜ | Value scores, roster logic |
-| 8. End-to-end pipeline | ⬜ | Connect all components |
-| 9. Evaluation & polish | ⬜ | Testing, tuning, docs |
+| 1. Project setup | ✅ Done | Repo, uv, dependencies |
+| 2. Groq LLM setup | ✅ Done | Configure LLM via API |
+| 3. Stats data | ✅ Done | Collect player stats (2018-2025) via nflreadpy |
+| 4. ADP data | ✅ Done | FantasyPros CSVs collected; exploring nflreadpy alternatives |
+| 5. Data exploration | 🔄 In progress | Notebook: merging stats + ADP, validating data |
+| 6. Document processing | ⬜ | Convert stats to text for RAG |
+| 7. Vector store | ⬜ | Embeddings + ChromaDB |
+| 8. Analytics engine | ⬜ | Value scores, roster logic |
+| 9. End-to-end pipeline | ⬜ | Connect all components |
+| 10. Evaluation & polish | ⬜ | Testing, tuning, docs |
 
 ## License
 

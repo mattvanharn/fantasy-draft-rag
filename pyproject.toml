@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fantasy_draft_rag"]
+
+[project]
+name = "fantasy-draft-rag"
+version = "0.1.0"
+description = "RAG-powered fantasy football draft assistant"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langchain",
+    "langchain-community",
+    "langchain-chroma",
+    "langchain-groq",
+    "langchain-ollama",
+    "chromadb",
+    "sentence-transformers",
+    "nflreadpy",
+    "python-dotenv",
+    "pytest",
+    "ipykernel>=7.2.0",
+    "matplotlib>=3.10.8",
+    "polars>=1.38.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+]
