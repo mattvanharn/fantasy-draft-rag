@@ -7,7 +7,7 @@ alwaysApply: false
 # Python Conventions
 
 - Python 3.11 (pyenv)
-- Package lives in `src/fantasy_draft_rag/`
+- Package lives in `src/fantasy_draft_ai/`
 - Scripts in `scripts/` are runnable entry points
 - Tests in `tests/` with pytest
 - Use type hints for function signatures

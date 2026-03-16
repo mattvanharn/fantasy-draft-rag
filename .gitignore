@@ -34,6 +34,10 @@ data/processed/*.parquet
 
 # ChromaDB local storage
 chroma_db/
+data/chroma/
+
+# Trained models
+models/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -44,3 +48,5 @@ Thumbs.db
 
 # Logs
 *.log
+
+_reference/

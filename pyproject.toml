@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/fantasy_draft_rag"]
+packages = ["src/fantasy_draft_ai"]
 
 [project]
-name = "fantasy-draft-rag"
-version = "0.1.0"
-description = "RAG-powered fantasy football draft assistant"
+name = "fantasy-draft-ai"
+version = "0.2.0"
+description = "ML-powered fantasy football draft assistant"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -25,6 +25,12 @@ dependencies = [
     "ipykernel>=7.2.0",
     "matplotlib>=3.10.8",
     "polars>=1.38.1",
+    "langchain-text-splitters>=1.1.1",
+    "bs4>=0.0.2",
+    "ipywidgets>=8.1.8",
+    "langchain-huggingface>=1.2.1",
+    "torch",
+    "scikit-learn",
 ]
 
 [project.optional-dependencies]
