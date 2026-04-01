@@ -54,3 +54,4 @@ _reference/
 data/*.db
 docs
 .worktrees/
+CLAUDE.md

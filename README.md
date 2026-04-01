@@ -11,7 +11,7 @@ Ask questions like:
 - "Compare Saquon Barkley's last 3 seasons side by side"
 - "How many WRs scored over 200 half-PPR points in the last 5 years?"
 
-The system converts natural language into SQL, executes it against the historical database, and summarizes the results in plain English. Future phases add ML projections and analytics (VOR, draft optimizer, trade evaluator).
+The system converts natural language into SQL, executes it against the historical database, and summarizes the results in plain English. Future phases add ML projections and analytics (VOR, draft optimizer, trade evaluator), followed by a lightweight web app demo layer.
 
 ## Architecture
 
@@ -30,7 +30,10 @@ LLM router (future: SQL vs RAG)
 │  Analytics (Phase 2)                │
 │  VOR, draft optimizer, trade eval   │
 │                                     │
-│  RAG (Phase 3 — deferred)           │
+│  Web App Demo (Phase 3)             │
+│  Streamlit/FastAPI UI showcase      │
+│                                     │
+│  RAG (Phase 4 — deferred)           │
 │  In-season articles & reports       │
 └─────────────────────────────────────┘
     ↓
@@ -78,7 +81,8 @@ Run scripts with `uv run python scripts/fetch_stats.py`.
 | 3. Feature engineering | Planned | ML features from historical + weekly data |
 | 4. Projection model | Planned | PyTorch model for next-season fantasy points |
 | 5. Analytics layer | Planned | VOR, draft optimizer, trade evaluator |
-| 6. RAG (deferred) | Future | In-season unstructured text when corpus exists |
+| 6. Web app demo layer | Planned | Lightweight UI to demo core capabilities |
+| 7. RAG (deferred) | Future | In-season unstructured text when corpus exists |
 
 ## License
 

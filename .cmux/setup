@@ -1,0 +1,59 @@
+#!/bin/bash
+# .cmux/setup — runs when `cmux new <branch>` creates/opens a worktree.
+# Sets up dependencies and, when inside tmux, creates a two-window layout:
+#   window 1: claude
+#   window 2: editor (nvim + shell split)
+set -euo pipefail
+
+echo "Setting up ff_ai_assistant worktree..."
+
+# Sync dependencies from pyproject.toml into the venv
+if command -v uv >/dev/null 2>&1; then
+  echo "Syncing uv dependencies..."
+  uv sync
+else
+  echo "WARNING: uv not found. Install: curl -LsSf https://astral.sh/uv/install.sh | sh"
+fi
+
+echo "Setting up tmux layout..."
+
+# If we're not running inside tmux, skip window setup gracefully.
+if [[ -z "${TMUX:-}" ]]; then
+  echo "Not in tmux; skipping window layout."
+  echo "Start tmux first if you want auto layout:"
+  echo "  tmux new -s ffai"
+  exit 0
+fi
+
+# Keep current window as Claude chat window.
+tmux rename-window "claude"
+
+# Create/find editor window.
+if tmux list-windows -F "#{window_name}" | grep -qx "editor"; then
+  tmux select-window -t "editor"
+else
+  tmux new-window -n "editor"
+fi
+
+# Ensure editor window is split and nvim is running in left pane.
+tmux select-window -t "editor"
+editor_panes="$(tmux display-message -p "#{window_panes}")"
+if [[ "$editor_panes" -eq 1 ]]; then
+  pane_path="$(tmux display-message -p "#{pane_current_path}")"
+  tmux split-window -h -c "$pane_path"
+fi
+tmux select-pane -t "editor.0"
+tmux send-keys -t "editor.0" "nvim ." Enter
+
+# Return focus to Claude window for cmux/Claude startup.
+tmux select-window -t "claude"
+
+echo
+echo "Layout ready:"
+echo "  Window 1: claude"
+echo "  Window 2: editor (nvim | shell)"
+echo "  Open a second terminal and run: tmux attach -t ffai"
+echo "  Keep one terminal on 'claude' and the other on 'editor'"
+echo
+echo "To activate venv manually: source .venv/bin/activate"
+echo "Or prefix commands with:   uv run <command>"
