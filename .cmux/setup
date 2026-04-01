@@ -1,8 +1,8 @@
 #!/bin/bash
 # .cmux/setup — runs when `cmux new <branch>` creates/opens a worktree.
-# Sets up dependencies and, when inside tmux, creates a two-window layout:
-#   window 1: claude
-#   window 2: editor (nvim + shell split)
+# Sets up dependencies and, when inside tmux, creates:
+#   window 1: claude (top pane for Claude, small bottom pane for commands/tests)
+#   window 2: editor (single pane shell; open nvim manually from attached terminal)
 set -euo pipefail
 
 echo "Setting up ff_ai_assistant worktree..."
@@ -25,35 +25,40 @@ if [[ -z "${TMUX:-}" ]]; then
   exit 0
 fi
 
-# Keep current window as Claude chat window.
+# Keep current window as Claude chat window and ensure a small bottom shell pane.
 tmux rename-window "claude"
+claude_path="$(tmux display-message -p "#{pane_current_path}")"
+claude_panes="$(tmux display-message -p "#{window_panes}")"
+if [[ "$claude_panes" -eq 1 ]]; then
+  # Create a small bottom pane (25% height) for quick commands/tests.
+  tmux split-window -v -p 25 -c "$claude_path"
+fi
+# Focus top pane for Claude (respects pane-base-index in tmux.conf — often 1, not 0).
+_pbi="$(tmux show -gv pane-base-index 2>/dev/null || echo 0)"
+tmux select-window -t "claude"
+tmux select-pane -t "claude.${_pbi}"
 
-# Create/find editor window.
+# Create/find editor window as a single shell pane.
 if tmux list-windows -F "#{window_name}" | grep -qx "editor"; then
   tmux select-window -t "editor"
+  # If editor was previously split, collapse back to a single pane.
+  while [[ "$(tmux display-message -p "#{window_panes}")" -gt 1 ]]; do
+    tmux kill-pane -a
+  done
 else
-  tmux new-window -n "editor"
+  tmux new-window -n "editor" -c "$claude_path"
 fi
-
-# Ensure editor window is split and nvim is running in left pane.
-tmux select-window -t "editor"
-editor_panes="$(tmux display-message -p "#{window_panes}")"
-if [[ "$editor_panes" -eq 1 ]]; then
-  pane_path="$(tmux display-message -p "#{pane_current_path}")"
-  tmux split-window -h -c "$pane_path"
-fi
-tmux select-pane -t "editor.0"
-tmux send-keys -t "editor.0" "nvim ." Enter
 
 # Return focus to Claude window for cmux/Claude startup.
 tmux select-window -t "claude"
 
 echo
 echo "Layout ready:"
-echo "  Window 1: claude"
-echo "  Window 2: editor (nvim | shell)"
+echo "  Window 1: claude (top = chat, bottom = command shell)"
+echo "  Window 2: editor (single shell pane)"
 echo "  Open a second terminal and run: tmux attach -t ffai"
 echo "  Keep one terminal on 'claude' and the other on 'editor'"
+echo "  In editor window, open nvim manually: nvim ."
 echo
 echo "To activate venv manually: source .venv/bin/activate"
 echo "Or prefix commands with:   uv run <command>"
