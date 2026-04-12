@@ -32,7 +32,7 @@ POSITIONS = ["QB", "RB", "WR", "TE", "K", "DST"]
 
 # LLM settings
 GROQ_MODEL = "llama-3.3-70b-versatile"
-GROQ_TEMPERATURE = 0.0
+GROQ_TEMPERATURE = 0.3
 
 # ML model hyperparameters
 TRAIN_SEASONS = list(range(2018, 2024))  # 2018-2023
