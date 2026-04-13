@@ -45,8 +45,11 @@ Rules:
 
 Domain notes:
 - ADP = Average Draft Position. Lower ADP = earlier draft pick = higher expected value.
-- Scoring is half-PPR (0.5 points per reception).
-- Fantasy points columns: fantasy_points_half_ppr (weekly), seasonal_fantasy_points (season total).
+- Fantasy points columns follow the pattern fantasy_points_{platform}_{format} (weekly) and seasonal_fantasy_points_{platform}_{format} (season total).
+- Platforms: espn, yahoo, sleeper. Formats: standard, half_ppr, ppr.
+- Default columns (use when no platform/format is specified): fantasy_points_sleeper_half_ppr (weekly), seasonal_fantasy_points_sleeper_half_ppr (season total).
+- Ranks (overall_points_rank, position_points_rank) are based on sleeper_half_ppr scoring.
+- Key platform difference: Yahoo INT penalty is -1pt; ESPN and Sleeper INT penalty is -2pt. This noticeably affects QB scoring.
 - Positions: QB, RB, WR, TE, K, DST. League size: 12 teams, seasons 2018-2025.
 
 Examples:
@@ -54,13 +57,16 @@ Q: How many games did Christian McCaffrey play in 2024?
 SQL: SELECT COUNT(*) AS games_played FROM weekly_stats WHERE player_display_name = 'Christian McCaffrey' AND season = 2024;
 
 Q: Who were the top 10 QBs by half-PPR fantasy points in 2024?
-SQL: SELECT player_display_name, seasonal_fantasy_points FROM player_seasons WHERE position = 'QB' AND season = 2024 ORDER BY seasonal_fantasy_points DESC LIMIT 10;
+SQL: SELECT player_display_name, seasonal_fantasy_points_sleeper_half_ppr FROM player_seasons WHERE position = 'QB' AND season = 2024 ORDER BY seasonal_fantasy_points_sleeper_half_ppr DESC LIMIT 10;
 
 Q: Give me Ja'Marr Chase's weekly scoring for all of 2023.
-SQL: SELECT week, fantasy_points_half_ppr FROM weekly_stats WHERE player_display_name = 'Ja''Marr Chase' AND season = 2023 ORDER BY week;
+SQL: SELECT week, fantasy_points_sleeper_half_ppr FROM weekly_stats WHERE player_display_name = 'Ja''Marr Chase' AND season = 2023 ORDER BY week;
 
 Q: Give me all of the players with 35+ point weeks in 2025.
-SQL: SELECT player_display_name, position, week, fantasy_points_half_ppr FROM weekly_stats WHERE fantasy_points_half_ppr >= 35 AND season = 2025 ORDER BY fantasy_points_half_ppr DESC;
+SQL: SELECT player_display_name, position, week, fantasy_points_sleeper_half_ppr FROM weekly_stats WHERE fantasy_points_sleeper_half_ppr >= 35 AND season = 2025 ORDER BY fantasy_points_sleeper_half_ppr DESC;
+
+Q: Who were the top QBs in ESPN PPR scoring in 2024?
+SQL: SELECT player_display_name, seasonal_fantasy_points_espn_ppr FROM player_seasons WHERE position = 'QB' AND season = 2024 ORDER BY seasonal_fantasy_points_espn_ppr DESC LIMIT 12;
 
 Question: {question}
 SQL:"""

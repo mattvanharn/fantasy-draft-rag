@@ -21,7 +21,16 @@ def test_data_paths_are_under_project_root() -> None:
 
 
 def test_league_constants() -> None:
-    """Smoke check for documented defaults (half-PPR, 12-team)."""
-    assert config.SCORING_FORMAT == "half_ppr"
+    """Smoke check for league defaults and scoring settings structure."""
     assert config.LEAGUE_SIZE == 12
     assert config.EMBEDDING_MODEL == "all-MiniLM-L6-v2"
+
+
+def test_scoring_presets_structure() -> None:
+    """All 9 scoring settings are present and have consistent keys."""
+    expected_keys = {f"{p}_{f}" for p in ("espn", "yahoo", "sleeper") for f in ("standard", "half_ppr", "ppr")}
+    assert set(config.ALL_SCORING_SETTINGS.keys()) == expected_keys
+    # receptions weight varies by format; verify half_ppr and ppr values
+    assert config.ALL_SCORING_SETTINGS["sleeper_half_ppr"]["receptions"] == 0.5
+    assert config.ALL_SCORING_SETTINGS["sleeper_ppr"]["receptions"] == 1.0
+    assert config.ALL_SCORING_SETTINGS["sleeper_standard"]["receptions"] == 0.0

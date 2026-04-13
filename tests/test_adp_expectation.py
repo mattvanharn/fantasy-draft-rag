@@ -16,7 +16,7 @@ def test_bucket_round_median_monotone_in_adp_for_rb() -> None:
                 "position": "RB",
                 "adp": float(adp),
                 "overall_points_rank": 10 + adp * 3,
-                "seasonal_fantasy_points": 100.0,
+                "seasonal_fantasy_points_sleeper_half_ppr": 100.0,
             }
         )
     df = pl.DataFrame(rows)

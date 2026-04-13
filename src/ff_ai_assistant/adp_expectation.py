@@ -37,7 +37,7 @@ def _training_frame(df: pl.DataFrame, cfg: AdpExpectTrainConfig) -> pl.DataFrame
         pl.col("overall_points_rank").is_not_null(),
     )
     if cfg.train_min_seasonal_points is not None:
-        t = t.filter(pl.col("seasonal_fantasy_points") >= cfg.train_min_seasonal_points)
+        t = t.filter(pl.col("seasonal_fantasy_points_sleeper_half_ppr") >= cfg.train_min_seasonal_points)
     return t
 
 

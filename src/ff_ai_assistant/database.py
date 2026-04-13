@@ -22,9 +22,11 @@ _WEEKLY_STATS_SCHEMA = """Table: weekly_stats
     position (VARCHAR), season (BIGINT), week (BIGINT)
     team (VARCHAR), opponent_team (VARCHAR), game_id (VARCHAR)
 
-    -- Fantasy scoring
-    fantasy_points_half_ppr (DOUBLE), fantasy_points (DOUBLE),
-  fantasy_points_ppr (DOUBLE)
+    -- Fantasy scoring — columns follow pattern fantasy_points_{platform}_{format}
+    -- Platforms: espn, yahoo, sleeper  |  Formats: standard, half_ppr, ppr
+    fantasy_points_espn_standard (DOUBLE), fantasy_points_espn_half_ppr (DOUBLE), fantasy_points_espn_ppr (DOUBLE)
+    fantasy_points_yahoo_standard (DOUBLE), fantasy_points_yahoo_half_ppr (DOUBLE), fantasy_points_yahoo_ppr (DOUBLE)
+    fantasy_points_sleeper_standard (DOUBLE), fantasy_points_sleeper_half_ppr (DOUBLE), fantasy_points_sleeper_ppr (DOUBLE)
 
     -- Passing (QBs; occasionally WR/RB on trick plays)
     completions (BIGINT), attempts (BIGINT), passing_yards (BIGINT),
@@ -181,9 +183,9 @@ if __name__ == "__main__":
     print(get_sample_rows("player_seasons"))
     print("\n=== Test query ===")
     results = execute_query(
-        "SELECT player_display_name, position, season, seasonal_fantasy_points "
+        "SELECT player_display_name, position, season, seasonal_fantasy_points_sleeper_half_ppr "
         "FROM player_seasons WHERE position = 'RB' AND season = 2024 "
-        "ORDER BY seasonal_fantasy_points DESC LIMIT 5"
+        "ORDER BY seasonal_fantasy_points_sleeper_half_ppr DESC LIMIT 5"
     )
     for row in results:
         print(row)
