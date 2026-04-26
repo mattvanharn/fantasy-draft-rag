@@ -2,7 +2,12 @@
 
 import pytest
 
-from ff_ai_assistant.database import execute_query, format_results, get_schema
+from ff_ai_assistant.database import (
+    execute_query,
+    format_results,
+    get_schema,
+    validate_sql,
+)
 
 
 def test_execute_query_rejects_non_select():
@@ -26,7 +31,33 @@ def test_format_results_single_row():
     assert "312.4" in result
 
 
-@pytest.mark.skip(reason="requires processed parquets — regenerate with scripts/process_stats.py first")
+def test_validate_sql_rejects_read_csv_auto():
+    with pytest.raises(ValueError):
+        validate_sql("SELECT * FROM read_csv_auto('/etc/passwd')")
+
+
+def test_validate_sql_rejects_multi_statement():
+    with pytest.raises(ValueError):
+        validate_sql("SELECT 1; DROP TABLE player_seasons")
+
+
+def test_validate_sql_rejects_non_whitelisted_table():
+    with pytest.raises(ValueError):
+        validate_sql("SELECT * FROM secret_table")
+
+
+def test_validate_sql_rejects_non_select_root():
+    with pytest.raises(ValueError):
+        validate_sql("DROP TABLE player_seasons")
+
+
+def test_validate_sql_valid_query():
+    validate_sql("SELECT player_name FROM player_seasons")
+
+
+@pytest.mark.skip(
+    reason="requires processed parquets — regenerate with scripts/process_stats.py first"
+)
 def test_get_schema_contains_table_names():
     schema = get_schema()
     assert "player_seasons" in schema

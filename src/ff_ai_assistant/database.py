@@ -9,12 +9,16 @@ Tables created:
 """
 
 import duckdb
+import sqlglot
 
 from ff_ai_assistant.config import (
     COMBINED_PARQUET,
     WEEKLY_PARQUET,
     POSITIONS,
 )
+
+from sqlglot import expressions as exp
+from sqlglot.errors import ParseError
 
 _WEEKLY_STATS_SCHEMA = """Table: weekly_stats
     -- Identity (all players)
@@ -74,6 +78,21 @@ _WEEKLY_STATS_SCHEMA = """Table: weekly_stats
 
     -- Note: individual defensive player stats available via def_* columns
   (not standard fantasy)"""
+
+_ALLOWED_TABLES = {"player_seasons", "weekly_stats"}
+
+_BANNED_FUNCS = {
+    "read_csv",
+    "read_csv_auto",
+    "read_parquet",
+    "read_json",
+    "read_json_auto",
+    "attach",
+    "copy",
+    "pragma",
+    "install",
+    "load",
+}
 
 
 def _create_connection() -> duckdb.DuckDBPyConnection:
@@ -143,14 +162,9 @@ def get_sample_rows(table: str, n: int = 3) -> str:
 def execute_query(sql: str) -> list[dict]:
     """Execute a SELECT query and return results as a list of dicts.
 
-    Only SELECT statements are allowed — prevents the LLM from modifying data.
-
-    Raises:
-        ValueError: If the query is not a SELECT statement.
+    Only queries which pass the safety validation are allowed — prevents the LLM from modifying data.
     """
-    sql_stripped = sql.strip().upper()
-    if not sql_stripped.startswith("SELECT"):
-        raise ValueError("Only SELECT queries are allowed")
+    validate_sql(sql)
 
     conn = get_connection()
     result = conn.execute(sql)
@@ -174,6 +188,39 @@ def format_results(results: list[dict], max_rows: int = 20) -> str:
     if len(results) > max_rows:
         text += f"\n... ({len(results) - max_rows} more rows)"
     return text
+
+
+def validate_sql(sql: str) -> None:
+    """Raise ValueError with a descriptive message if sql fails any safety check.
+
+    Checks (in order):
+    1. Parses as valid SQL
+    2. Single statement only
+    3. Root node is SELECT
+    4. No calls to banned functions
+    5. All table references are in _ALLOWED_TABLES
+    """
+
+    # 1. Parses as valid SQL
+    # 2. Single statement only
+    try:
+        tree = sqlglot.parse_one(sql, dialect="duckdb")
+    except ParseError as e:
+        raise ValueError(f"Invalid SQL: {e}") from e
+
+    # 3. Root node is SELECT
+    if not isinstance(tree, exp.Select):
+        raise ValueError("Only SELECT queries are allowed")
+
+    # 4. No calls to banned functions
+    for fcn in tree.find_all(exp.Func):
+        if fcn.name.lower() in _BANNED_FUNCS:
+            raise ValueError(f"Banned function call detected: {fcn.name}")
+
+    # 5. All table references are in _ALLOWED_TABLES
+    for table in tree.find_all(exp.Table):
+        if table.name.lower() not in _ALLOWED_TABLES:
+            raise ValueError(f"Access to table {table.name} not permitted")
 
 
 if __name__ == "__main__":
